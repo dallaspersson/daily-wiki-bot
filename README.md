@@ -1,2 +1,2 @@
 # Daily Wiki Bot
-![alt tag](/daily_wiki_bot.png)
+<img src="/daily_wiki_bot.png" width="200" height="200">
