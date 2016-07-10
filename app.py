@@ -5,19 +5,24 @@ import requests
 import re
 import os
 import tweepy
+import time
 
-auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
-auth.set_access_token(os.environ['ACCESS_TOKEN'], os.environ['ACCESS_TOKEN_SECRET'])
+class DailyWikiBot:
+    def __init__(self):
+        auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
+        auth.set_access_token(os.environ['ACCESS_TOKEN'], os.environ['ACCESS_TOKEN_SECRET'])
+        self.tweepy = tweepy.API(auth)
 
-tweepy = tweepy.API(auth)
+    def run(self):
+        page = requests.get('https://en.wikipedia.org/wiki/{0}_{1}'.format(time.strftime('%B'), time.strftime('%d')))
+        facts = html.fromstring(page.content).xpath('//div[@id="mw-content-text"]/ul[1]/li')
 
-page = requests.get('https://en.wikipedia.org/wiki/Main_Page')
-tree = html.fromstring(page.content)
+        for fact in facts:
+            fact = re.sub('<[^<]+>|\\n', "", html.tostring(fact, encoding="ascii")).replace("&#8211;", "-")
+            if len(fact) <= 140:
+                self.tweepy.update_status(fact)
+                break
 
-stories = tree.xpath('//div[@id="mp-otd"]/ul[1]/li')
 
-for story in stories:
-    story = re.sub('<[^<]+>|\\n', "", html.tostring(story, encoding="ascii")).replace("&#8211;", "-")
-    if len(story) <= 140:
-        tweepy.update_status(story)
-        break
+bot = DailyWikiBot()
+bot.run()
