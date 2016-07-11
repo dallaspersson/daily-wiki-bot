@@ -18,7 +18,7 @@ class DailyWikiBot:
         facts = html.fromstring(page.content).xpath('//div[@id="mw-content-text"]/ul[1]/li')
 
         for fact in facts:
-            fact = re.sub('<[^<]+>|\\n', "", html.tostring(fact, encoding="ascii")).replace("&#8211;", "-")
+            fact = re.sub('<[^<]+>|\\n', "", html.tostring(fact, encoding="UTF-8"))
             if len(fact) <= 140:
                 self.tweepy.update_status(fact)
                 break
