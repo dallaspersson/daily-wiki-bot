@@ -8,6 +8,8 @@ import tweepy
 import time
 import random
 
+MAX_TWEET_LEN = 140
+
 class DailyWikiBot:
     def __init__(self):
         auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
@@ -18,13 +20,14 @@ class DailyWikiBot:
         parsedFacts = []
         for fact in facts:
             fact = re.sub('<[^<]+>|\\n', '', html.tostring(fact, encoding='UTF-8'))
-            if len(fact) <= 140: parsedFacts.append(fact)
+            if len(fact) > MAX_TWEET_LEN: continue
+            if len(fact + ' #onthisday') <= MAX_TWEET_LEN: fact = fact + ' #onthisday'
+            parsedFacts.append(fact)
         return parsedFacts
 
     def run(self):
         page = requests.get('https://en.wikipedia.org/wiki/{0}_{1}'.format(time.strftime('%B'), time.strftime('%d')))
         facts = self.parse(html.fromstring(page.content).xpath('//div[@id="mw-content-text"]/ul[1]/li'))
-
         self.tweepy.update_status(random.choice(facts))
 
 
